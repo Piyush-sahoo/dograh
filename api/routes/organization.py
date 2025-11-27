@@ -1,9 +1,10 @@
+from typing import Union
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from api.db import db_client
 from api.db.models import UserModel
 from api.enums import OrganizationConfigurationKey
-from typing import Union
 from api.schemas.telephony_config import (
     TelephonyConfigurationResponse,
     TwilioConfigurationRequest,
@@ -25,11 +26,10 @@ PROVIDER_MASKED_FIELDS = {
     "vobiz": ["auth_id", "auth_token"]
 }
 
+
 # TODO: Make endpoints provider-agnostic
 @router.get("/telephony-config", response_model=TelephonyConfigurationResponse)
-async def get_telephony_configuration(
-    user: UserModel = Depends(get_user)
-):
+async def get_telephony_configuration(user: UserModel = Depends(get_user)):
     """Get telephony configuration for the user's organization with masked sensitive fields."""
     if not user.selected_organization_id:
         raise HTTPException(status_code=400, detail="No organization selected")
@@ -43,11 +43,13 @@ async def get_telephony_configuration(
         return TelephonyConfigurationResponse()
 
     stored_provider = config.value.get("provider", "twilio")
-    
+
     if stored_provider == "twilio":
         account_sid = config.value.get("account_sid", "")
         auth_token = config.value.get("auth_token", "")
-        from_numbers = config.value.get("from_numbers", []) if account_sid and auth_token else []
+        from_numbers = (
+            config.value.get("from_numbers", []) if account_sid and auth_token else []
+        )
 
         return TelephonyConfigurationResponse(
             twilio=TwilioConfigurationResponse(
@@ -64,8 +66,12 @@ async def get_telephony_configuration(
         private_key = config.value.get("private_key", "")
         api_key = config.value.get("api_key", "")
         api_secret = config.value.get("api_secret", "")
-        from_numbers = config.value.get("from_numbers", []) if application_id and private_key else []
-        
+        from_numbers = (
+            config.value.get("from_numbers", [])
+            if application_id and private_key
+            else []
+        )
+
         return TelephonyConfigurationResponse(
             twilio=None,
             vonage=VonageConfigurationResponse(
@@ -137,7 +143,9 @@ async def save_telephony_configuration(
             "from_numbers": request.from_numbers,
         }
     else:
-        raise HTTPException(status_code=400, detail=f"Unsupported provider: {request.provider}")
+        raise HTTPException(
+            status_code=400, detail=f"Unsupported provider: {request.provider}"
+        )
 
     if existing_config and existing_config.value:
         existing_provider = existing_config.value.get("provider")
@@ -153,14 +161,16 @@ async def save_telephony_configuration(
 
     return {"message": "Telephony configuration saved successfully"}
 
-def preserve_masked_fields(request, existing_config, config_value):
 
+def preserve_masked_fields(request, existing_config, config_value):
     provider = request.provider
     masked_fields = PROVIDER_MASKED_FIELDS.get(provider, [])
-    
+
     for field_name in masked_fields:
         if hasattr(request, field_name):
             field_value = getattr(request, field_name)
             # Check if field has a value and is a masked version of the existing value
-            if field_value and is_mask_of(field_value, existing_config.value.get(field_name, "")):
+            if field_value and is_mask_of(
+                field_value, existing_config.value.get(field_name, "")
+            ):
                 config_value[field_name] = existing_config.value[field_name]
