@@ -64,6 +64,7 @@
               "integrations/telephony/overview",
               "integrations/telephony/twilio",
               "integrations/telephony/vonage",
+              "integrations/telephony/vobiz",
               "integrations/telephony/webhooks",
               "integrations/telephony/custom"
             ]

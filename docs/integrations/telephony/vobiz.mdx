@@ -1,0 +1,180 @@
+---
+title: "Vobiz Integration"
+description: "Configure Vobiz for voice communication in Dograh AI"
+---
+
+## Overview
+
+Vobiz is a cloud communications platform that provides voice calling capabilities. Dograh AI's Vobiz integration enables seamless voice interactions using Vobiz's reliable infrastructure.
+
+## Prerequisites
+
+Before setting up Vobiz integration, you'll need:
+
+- A [Vobiz account](https://console.vobiz.ai/auth/login/)
+- Auth ID and Auth Token from your Vobiz Console
+- At least one Vobiz phone number (DID)
+- Sufficient credits to make calls
+- Dograh AI instance running and accessible
+
+## Video Tutorial
+
+Watch this step-by-step guide to set up Vobiz with Dograh AI:
+
+<iframe
+  className="w-full aspect-video rounded-xl"
+  src=""
+  title="Dograh Vobiz Setup"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+_Video tutorial coming soon_
+
+## Configuration
+
+### Step 1: Create Vobiz Account
+
+1. Visit [Vobiz Console](https://console.vobiz.ai/auth/login/)
+2. Sign up for a new account
+3. Complete email verification
+4. You'll receive initial credits for testing
+
+### Step 2: Get Your Credentials
+
+1. Log in to your [Vobiz Dashboard](https://console.vobiz.ai/)
+2. Find your **Auth ID** and **Auth Token** in the dashboard
+3. Copy these credentials securely
+
+### Step 3: Purchase a Phone Number
+
+1. Navigate to the **DID** page in your Vobiz console
+2. Browse available numbers by country/region
+3. Purchase at least one phone number
+4. You'll have enough credits from signup to buy your first number
+5. Copy your phone number(s)
+
+### Step 4: Configure in Dograh AI
+
+1. Navigate to **Workflow** → **Phone Call** → **Configure Telephony**
+2. Select **Vobiz** as your provider
+3. Enter your credentials:
+   - Auth ID
+   - Auth Token
+   - From Phone Number (with country code, e.g., +918071387428)
+4. Click **Save Configuration**
+
+### Step 5: Test Your Configuration
+
+1. Create a test workflow
+2. Enter a phone number to call (with country code, e.g., +918071387428)
+3. Click "Test Call" to verify connection
+4. Check call logs for successful connection
+
+## How It Works
+
+### Technical Details
+
+Vobiz integration uses these characteristics:
+
+- **Audio Format**: 8kHz μ-law (MULAW) - same as Twilio
+- **Protocol**: WebSocket with JSON messages
+- **Authentication**: X-Auth-ID and X-Auth-Token HTTP headers
+- **WebSocket**: Base64-encoded audio in JSON messages
+
+### Call Flow
+
+When you initiate a call through Dograh AI:
+
+1. System selects a phone number from your configured pool
+2. Dograh generates webhook URLs with cloudflared tunnel
+3. Vobiz API initiates the call to your recipient
+4. Ring callback confirms the call is ringing
+5. Once answered, XML webhook provides WebSocket connection details
+6. Audio streams in real-time for voice interaction
+7. Hangup callback provides call statistics and costs
+
+## Campaign Features
+
+When using Vobiz with campaigns:
+
+- **Rate Limiting**: 2 calls per second (CPS) to prevent overwhelming
+- **Concurrent Calls**: Up to 10 simultaneous calls
+- **Cost Tracking**: ₹0.65 per minute for call billing
+- **Call Management**: System manages call slots to optimize throughput
+
+For any issues or questions, contact Vobiz support at [support@vobiz.ai](mailto:support@vobiz.ai)
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Invalid phone number error">
+    Ensure phone numbers include country code in E.164 format: `+918071387428`
+  </Accordion>
+
+  <Accordion title="Authentication failed">
+    - Verify Auth ID and Auth Token are correct
+    - Check for extra spaces in credentials
+    - Ensure credentials match your Vobiz console exactly
+  </Accordion>
+
+  <Accordion title="Webhook signature validation failing">
+    - Confirm your Auth Token matches exactly
+    - Verify the webhook URL is publicly accessible
+    - Check cloudflared tunnel is running properly
+  </Accordion>
+
+  <Accordion title="Calls connecting but disconnecting quickly">
+    - Check WebSocket connection logs
+    - Verify audio pipeline is configured correctly
+    - Ensure VAD and Smart Turn are enabled
+    - Review call duration limits in Vobiz console
+  </Accordion>
+
+  <Accordion title="Insufficient credits">
+    - Log in to Vobiz console and check credit balance
+    - Add credits via the billing page
+    - Monitor usage to avoid unexpected depletion
+  </Accordion>
+</AccordionGroup>
+
+## Best Practices
+
+- **Testing**: Always test with a single call before running campaigns
+- **Credentials**: Store Auth ID and Auth Token securely in the database
+- **Numbers**: Configure multiple numbers for high-volume campaigns
+- **Monitoring**: Check Vobiz console regularly for usage and billing
+- **Greeting**: Always configure a greeting message in workflows (required)
+- **Audio Quality**: Use default pipeline configuration for best results
+
+## Cost Considerations
+
+Vobiz pricing includes:
+- Per-minute charges for calls
+- Phone number (DID) rental fees
+- Initial credits provided on signup
+
+Check your [Vobiz Console](https://console.vobiz.ai/) for current rates and usage.
+
+## API Differences from Other Providers
+
+| Feature | Twilio | Vonage | Vobiz |
+|---------|---------|---------|---------|
+| Audio Format | 8kHz μ-law | 16kHz Linear PCM | 8kHz μ-law |
+| Control Format | TwiML (XML) | NCCO (JSON) | XML |
+| Authentication | Account SID/Token | JWT | Auth ID/Token |
+| WebSocket Data | Base64 text | Binary frames | Base64 text |
+| Phone Format | With '+' | Without '+' | With '+' |
+
+## Next Steps
+
+- Create your first workflow with a greeting message (required)
+- Test the integration with a phone call
+- Monitor call quality and costs in Vobiz console
+- Explore campaign features for bulk calling
+- Configure multiple phone numbers for redundancy
+
+## Additional Resources
+
+- [Vobiz Console](https://console.vobiz.ai/)
+- [Vobiz API Documentation](https://www.docs.vobiz.ai/)
